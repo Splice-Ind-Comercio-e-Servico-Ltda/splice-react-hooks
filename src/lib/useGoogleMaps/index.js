@@ -29,7 +29,7 @@ const useGoogleMaps = ({
     [_clientId, _libraries, _versioning, baseUrl]
   );
 
-  const googleMapsReady = useExternalScript(src);
+  const googleMapsReady = useExternalScript({ src });
 
   const getAddressAndLocation = useCallback((geocoderConfig) => {
     if (!geocoderRef.current) {
