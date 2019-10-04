@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { useGoogleMaps } from '../lib';
+import { useGoogleMapsScript } from '../lib';
 
 const App = () => {
-  const { googleMapsReady } = useGoogleMaps();
+  const googleMapsReady = useGoogleMapsScript();
 
   return (
     <div>

@@ -1,4 +1,5 @@
 import useExternalScript from './useExternalScript';
-import useGoogleMaps from './useGoogleMaps';
+import useGoogleMapsScript from './useGoogleMapsScript';
+import useGoogleMapsActions from './useGoogleMapsActions';
 
-export { useExternalScript, useGoogleMaps };
+export { useExternalScript, useGoogleMapsScript, useGoogleMapsActions };
