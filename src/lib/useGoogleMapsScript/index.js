@@ -3,11 +3,11 @@ import { useMemo } from 'react';
 import useExternalScript from '../useExternalScript';
 
 /**
- * Loads google api script and returns some functions.
- * @param {String} clientId Your Google client ID;
- * @param {Array[String]} libraries List of libraries to load;
- * @param {String} [versioning] Weekly, quarterly (default) or version number (Ex: 3.38);
- * @returns {Boolean} googleMapsReady as true for loaded and false for error;
+ * Loads Google Maps' API script.
+ * @param {String} clientId Your Google Maps' client ID.
+ * @param {Array[String]} libraries List of libraries to load.
+ * @param {String} [versioning] Weekly, quarterly (default) or version number (e.g. 3.38).
+ * @returns {Boolean} googleMapsReady as true for loaded and false for error.
  */
 const useGoogleMapsScript = (
   clientId,
