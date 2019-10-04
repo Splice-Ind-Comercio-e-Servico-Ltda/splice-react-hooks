@@ -3,18 +3,19 @@ import { useCallback, useRef } from 'react';
 import { checkForGoogleMaps, checkForGeometryLib } from '../utils';
 
 const useGoogleMapsActions = () => {
-  const geocoderRef = useRef(null);
-  const directionsServiceRef = useRef(null);
-  const directionsRendererRef = useRef(null);
+  const _geocoderRef = useRef(null);
+  const _boundsRef = useRef();
+  const _directionsServiceRef = useRef(null);
+  const _directionsRendererRef = useRef(null);
 
   /**
    * Clears the current route rendered by Google Maps' DirectionsRenderer.
    * @see {https://developers.google.com/maps/documentation/javascript/reference/directions#DirectionsRenderer}
    * @returns {void}
    */
-  const clearRouteFromDirectionsService = useCallback(() => {
-    if (directionsRendererRef.current) {
-      directionsRendererRef.current.setMap(null);
+  const _clearRouteFromDirectionsService = useCallback(() => {
+    if (_directionsRendererRef.current) {
+      _directionsRendererRef.current.setMap(null);
     }
   }, []);
 
@@ -28,7 +29,7 @@ const useGoogleMapsActions = () => {
    * @see {https://developers.google.com/maps/documentation/javascript/reference/directions#DirectionsRendererOptions}
    * @returns {void}
    */
-  const drawRouteFromDirectionsService = useCallback(
+  const _drawRouteFromDirectionsService = useCallback(
     (directionsResult, mapInstance, directionsRendererOptions = {}) => {
       checkForGoogleMaps();
 
@@ -43,15 +44,15 @@ const useGoogleMapsActions = () => {
       }
 
       try {
-        if (!directionsRendererRef.current) {
-          directionsRendererRef.current = new window.google.maps.DirectionsRenderer(
+        if (!_directionsRendererRef.current) {
+          _directionsRendererRef.current = new window.google.maps.DirectionsRenderer(
             directionsRendererOptions
           );
         }
 
-        directionsRendererRef.current.setMap(mapInstance);
+        _directionsRendererRef.current.setMap(mapInstance);
 
-        directionsRendererRef.current.setDirections(directionsResult);
+        _directionsRendererRef.current.setDirections(directionsResult);
       } catch (error) {
         throw error;
       }
@@ -68,7 +69,7 @@ const useGoogleMapsActions = () => {
    * @reject {Error}
    * @returns {Promise.<Object>} Object containing the address, location and number, if available.
    */
-  const getAddressAndLocationFromGeocoderResult = useCallback(
+  const _getAddressAndLocationFromGeocoderResult = useCallback(
     (geocoderResult) =>
       new Promise((resolve, reject) => {
         try {
@@ -106,7 +107,7 @@ const useGoogleMapsActions = () => {
    * @returns {Promise.<Array.<window.google.maps.LatLng>>} Array of Google Maps' LatLng instances.
    * @see {https://developers.google.com/maps/documentation/javascript/reference/coordinates#LatLng}
    */
-  const getLatLngsFromDirectionsResult = useCallback(
+  const _getLatLngsFromDirectionsResult = useCallback(
     (directionsResult) =>
       new Promise((resolve, reject) => {
         try {
@@ -153,7 +154,7 @@ const useGoogleMapsActions = () => {
    * @reject {Error}
    * @returns {Promise.<Array.<window.google.maps.LatLng>>} Array of Google Maps' LatLngs, with the given distance between each.
    */
-  const getPositionsEveryProvidedMeters = (latLngs, meters = 500) => {
+  const _getPositionsEveryProvidedMeters = (latLngs, meters = 500) => {
     checkForGeometryLib();
 
     if (latLngs.length <= 1) {
@@ -214,16 +215,16 @@ const useGoogleMapsActions = () => {
    * @returns {Promise.<(window.google.maps.GeocoderResult|null)>} Google Maps' GeocoderResult interface or null.
    * @see {https://developers.google.com/maps/documentation/javascript/reference/geocoder#GeocoderResult}
    */
-  const getResultsFromGeocoderService = useCallback((geocoderRequest) => {
+  const _getResultsFromGeocoderService = useCallback((geocoderRequest) => {
     checkForGoogleMaps();
 
-    if (!geocoderRef.current) {
-      geocoderRef.current = new window.google.maps.Geocoder();
+    if (!_geocoderRef.current) {
+      _geocoderRef.current = new window.google.maps.Geocoder();
     }
 
     return new Promise((resolve, reject) => {
       try {
-        geocoderRef.current.geocode(geocoderRequest, (geocoderResult, geocoderStatus) => {
+        _geocoderRef.current.geocode(geocoderRequest, (geocoderResult, geocoderStatus) => {
           if (geocoderStatus === 'OK') {
             resolve(geocoderResult);
           } else {
@@ -246,16 +247,16 @@ const useGoogleMapsActions = () => {
    * @returns {Promise.<window.google.maps.DirectionsResult>} Google Maps' DirectionsResult interface.
    * @see {https://developers.google.com/maps/documentation/javascript/reference/directions#DirectionsResult}
    */
-  const getRouteFromDirectionsService = useCallback((directionsRequest) => {
+  const _getRouteFromDirectionsService = useCallback((directionsRequest) => {
     checkForGoogleMaps();
 
-    if (!directionsServiceRef.current) {
-      directionsServiceRef.current = new window.google.maps.DirectionsService();
+    if (!_directionsServiceRef.current) {
+      _directionsServiceRef.current = new window.google.maps.DirectionsService();
     }
 
     return new Promise((resolve, reject) => {
       try {
-        directionsServiceRef.current.route(directionsRequest, (response, status) => {
+        _directionsServiceRef.current.route(directionsRequest, (response, status) => {
           if (status === 'OK') {
             resolve(response);
           } else {
@@ -268,14 +269,39 @@ const useGoogleMapsActions = () => {
     });
   }, []);
 
+  /**
+   * Create the Google Maps LatLngBounds object internally.
+   */
+  const _createBounds = useCallback(
+    () => (_boundsRef.current = new window.google.maps.LatLngBounds()),
+    []
+  );
+
+  /**
+   * Receives a position object and extends the created bounds object.
+   */
+  const _extendBounds = useCallback((position) => {
+    _boundsRef.current.extend(position);
+  }, []);
+
+  /**
+   * Fit the current bounds object.
+   */
+  const _fitBounds = useCallback((mapInstance) => {
+    mapInstance.fitBounds(_boundsRef.current);
+  }, []);
+
   return {
-    clearRouteFromDirectionsService,
-    drawRouteFromDirectionsService,
-    getAddressAndLocationFromGeocoderResult,
-    getLatLngsFromDirectionsResult,
-    getPositionsEveryProvidedMeters,
-    getResultsFromGeocoderService,
-    getRouteFromDirectionsService,
+    clearRouteFromDirectionsService: _clearRouteFromDirectionsService,
+    drawRouteFromDirectionsService: _drawRouteFromDirectionsService,
+    getAddressAndLocationFromGeocoderResult: _getAddressAndLocationFromGeocoderResult,
+    getLatLngsFromDirectionsResult: _getLatLngsFromDirectionsResult,
+    getPositionsEveryProvidedMeters: _getPositionsEveryProvidedMeters,
+    getResultsFromGeocoderService: _getResultsFromGeocoderService,
+    getRouteFromDirectionsService: _getRouteFromDirectionsService,
+    createBounds: _createBounds,
+    extendBounds: _extendBounds,
+    fitBounds: _fitBounds,
   };
 };
 
