@@ -1,5 +1,3 @@
-
-
 const fs = require('fs');
 const isWsl = require('is-wsl');
 const path = require('path');
@@ -46,16 +44,17 @@ const sassModuleRegex = /\.module\.(scss|sass)$/;
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
 module.exports = function(webpackEnv) {
-  const isEnvDemo = webpackEnv === 'demo';  // CRL: Add demo environment
+  const isEnvDemo = webpackEnv === 'demo'; // CRL: Add demo environment
   const isEnvDevelopment = webpackEnv === 'development';
   const isEnvProduction = webpackEnv === 'production';
 
   // Webpack uses `publicPath` to determine where the app is being served from.
   // It requires a trailing slash, or the file assets will get an incorrect path.
   // In development, we always serve from the root. This makes config easier.
-  const publicPath = (isEnvDemo || isEnvProduction) // CRL
-    ? paths.servedPath
-    : isEnvDevelopment && '/';
+  const publicPath =
+    isEnvDemo || isEnvProduction // CRL
+      ? paths.servedPath
+      : isEnvDevelopment && '/';
   // Some apps do not use client-side routing with pushState.
   // For these, "homepage" can be set to "." to enable relative asset paths.
   const shouldUseRelativeAssetPaths = publicPath === './';
@@ -63,9 +62,10 @@ module.exports = function(webpackEnv) {
   // `publicUrl` is just like `publicPath`, but we will provide it to our app
   // as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.
   // Omit trailing slash as %PUBLIC_URL%/xyz looks better than %PUBLIC_URL%xyz.
-  const publicUrl = (isEnvDemo || isEnvProduction)  // CRL
-    ? publicPath.slice(0, -1)
-    : isEnvDevelopment && '';
+  const publicUrl =
+    isEnvDemo || isEnvProduction // CRL
+      ? publicPath.slice(0, -1)
+      : isEnvDevelopment && '';
   // Get environment variables to inject into our app.
   const env = getClientEnvironment(publicUrl);
 
@@ -73,7 +73,8 @@ module.exports = function(webpackEnv) {
   const getStyleLoaders = (cssOptions, preProcessor) => {
     const loaders = [
       isEnvDevelopment && require.resolve('style-loader'),
-      (isEnvDemo || isEnvProduction) && { // CRL
+      (isEnvDemo || isEnvProduction) && {
+        // CRL
         loader: MiniCssExtractPlugin.loader,
         options: Object.assign(
           {},
@@ -106,7 +107,7 @@ module.exports = function(webpackEnv) {
             // which in turn let's users customize the target behavior as per their needs.
             postcssNormalize(),
           ],
-          sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap,  // CRL
+          sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap, // CRL
         },
       },
     ].filter(Boolean);
@@ -114,7 +115,7 @@ module.exports = function(webpackEnv) {
       loaders.push({
         loader: require.resolve(preProcessor),
         options: {
-          sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap,  // CRL
+          sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap, // CRL
         },
       });
     }
@@ -122,14 +123,16 @@ module.exports = function(webpackEnv) {
   };
 
   return {
-    mode: (isEnvDemo || isEnvProduction) ? 'production' : isEnvDevelopment && 'development',  // CRL
+    mode: isEnvDemo || isEnvProduction ? 'production' : isEnvDevelopment && 'development', // CRL
     // Stop compilation early in production
-    bail: (isEnvDemo || isEnvProduction), // CRL
-    devtool: (isEnvDemo || isEnvProduction) // CRL
-      ? shouldUseSourceMap
-        ? 'source-map'
-        : false
-      : isEnvDevelopment && 'cheap-module-source-map',
+    bail: isEnvDemo || isEnvProduction, // CRL
+    devtool:
+      isEnvDemo || isEnvProduction // CRL
+        ? shouldUseSourceMap
+          ? 'source-map'
+          : false
+        : isEnvDevelopment && 'cheap-module-source-map',
+    target: 'node',
     // These are the "entry points" to our application.
     // This means they will be the "root" imports that are included in JS bundle.
     entry: [
@@ -143,8 +146,7 @@ module.exports = function(webpackEnv) {
       // the line below with these two lines if you prefer the stock client:
       // require.resolve('webpack-dev-server/client') + '?/',
       // require.resolve('webpack/hot/dev-server'),
-      isEnvDevelopment &&
-        require.resolve('react-dev-utils/webpackHotDevClient'),
+      isEnvDevelopment && require.resolve('react-dev-utils/webpackHotDevClient'),
       // Finally, this is your app's code:
       isEnvDemo && paths.appDemoIndexJs, // CRL: update entry
       isEnvDevelopment && paths.appIndexJs, // CRL: update entry
@@ -155,15 +157,14 @@ module.exports = function(webpackEnv) {
     ].filter(Boolean),
     output: {
       // The build folder.
-      path: isEnvProduction ? paths.appBuild : (isEnvDemo ? paths.appDemoBuild : undefined), // CRL: update output.path
+      path: isEnvProduction ? paths.appBuild : isEnvDemo ? paths.appDemoBuild : undefined, // CRL: update output.path
       // Add /* filename */ comments to generated require()s in the output.
       pathinfo: isEnvDevelopment,
       // There will be one main bundle, and one file per asynchronous chunk.
       // In development, it does not produce real files.
-      filename: (isEnvDemo || isEnvProduction)
-        ? 'index.js'
-        : isEnvDevelopment && 'static/js/bundle.js', // CRL: update output.filename
-      libraryTarget: (isEnvDemo || isEnvProduction) ? 'umd' : undefined,  // CRL: Add output.libraryTarget
+      filename:
+        isEnvDemo || isEnvProduction ? 'index.js' : isEnvDevelopment && 'static/js/bundle.js', // CRL: update output.filename
+      libraryTarget: isEnvDemo || isEnvProduction ? 'umd' : undefined, // CRL: Add output.libraryTarget
       // TODO: remove this when upgrading to webpack 5
       futureEmitAssets: true,
       // There are also additional JS chunk files if you use code splitting.
@@ -174,16 +175,14 @@ module.exports = function(webpackEnv) {
       // We use "/" in development.
       publicPath: publicPath,
       // Point sourcemap entries to original disk location (format as URL on Windows)
-      devtoolModuleFilenameTemplate: (isEnvDemo || isEnvProduction) // CRL: update output.devtoolModuleFilenameTemplate check
-        ? info =>
-            path
-              .relative(paths.appSrc, info.absoluteResourcePath)
-              .replace(/\\/g, '/')
-        : isEnvDevelopment &&
-          (info => path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')),
+      devtoolModuleFilenameTemplate:
+        isEnvDemo || isEnvProduction // CRL: update output.devtoolModuleFilenameTemplate check
+          ? (info) => path.relative(paths.appSrc, info.absoluteResourcePath).replace(/\\/g, '/')
+          : isEnvDevelopment &&
+            ((info) => path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')),
     },
     optimization: {
-      minimize: (isEnvDemo || isEnvProduction), // CRL
+      minimize: isEnvDemo || isEnvProduction, // CRL
       minimizer: [
         // This is only used in production mode
         new TerserPlugin({
@@ -271,8 +270,8 @@ module.exports = function(webpackEnv) {
       // `web` extension prefixes have been added for better support
       // for React Native Web.
       extensions: paths.moduleFileExtensions
-        .map(ext => `.${ext}`)
-        .filter(ext => useTypeScript || !ext.includes('ts')),
+        .map((ext) => `.${ext}`)
+        .filter((ext) => useTypeScript || !ext.includes('ts')),
       alias: {
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
@@ -313,12 +312,11 @@ module.exports = function(webpackEnv) {
               options: {
                 formatter: require.resolve('react-dev-utils/eslintFormatter'),
                 eslintPath: require.resolve('eslint'),
-                
               },
               loader: require.resolve('eslint-loader'),
             },
           ],
-          include: isEnvProduction ? paths.appLibSrc : (isEnvDemo ? paths.appDemoSrc : paths.appSrc), // CRL: match demo/lib src path
+          include: isEnvProduction ? paths.appLibSrc : isEnvDemo ? paths.appDemoSrc : paths.appSrc, // CRL: match demo/lib src path
         },
         {
           // "oneOf" will traverse all following loaders until one will
@@ -343,14 +341,12 @@ module.exports = function(webpackEnv) {
               include: isEnvProduction
                 ? paths.appLibSrc
                 : isEnvDevelopment
-                  ? paths.appSrc
-                  : [paths.appLibSrc, paths.appDemoSrc],  // CRL
+                ? paths.appSrc
+                : [paths.appLibSrc, paths.appDemoSrc], // CRL
               loader: require.resolve('babel-loader'),
               options: {
-                customize: require.resolve(
-                  'babel-preset-react-app/webpack-overrides'
-                ),
-                
+                customize: require.resolve('babel-preset-react-app/webpack-overrides'),
+
                 plugins: [
                   [
                     require.resolve('babel-plugin-named-asset-import'),
@@ -367,8 +363,8 @@ module.exports = function(webpackEnv) {
                 // It enables caching results in ./node_modules/.cache/babel-loader/
                 // directory for faster rebuilds.
                 cacheDirectory: true,
-                cacheCompression: (isEnvDemo || isEnvProduction), // CRL
-                compact: (isEnvDemo || isEnvProduction),  // CRL
+                cacheCompression: isEnvDemo || isEnvProduction, // CRL
+                compact: isEnvDemo || isEnvProduction, // CRL
               },
             },
             // Process any JS outside of the app with Babel.
@@ -382,14 +378,11 @@ module.exports = function(webpackEnv) {
                 configFile: false,
                 compact: false,
                 presets: [
-                  [
-                    require.resolve('babel-preset-react-app/dependencies'),
-                    { helpers: true },
-                  ],
+                  [require.resolve('babel-preset-react-app/dependencies'), { helpers: true }],
                 ],
                 cacheDirectory: true,
-                cacheCompression: (isEnvDemo || isEnvProduction),  // CRL
-                
+                cacheCompression: isEnvDemo || isEnvProduction, // CRL
+
                 // If an error happens in a package, it's possible to be
                 // because it was compiled. Thus, we don't want the browser
                 // debugger to show the original code. Instead, the code
@@ -409,7 +402,7 @@ module.exports = function(webpackEnv) {
               exclude: cssModuleRegex,
               use: getStyleLoaders({
                 importLoaders: 1,
-                sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap,  // CRL
+                sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap, // CRL
               }),
               // Don't consider CSS imports dead code even if the
               // containing package claims to have no side effects.
@@ -423,7 +416,7 @@ module.exports = function(webpackEnv) {
               test: cssModuleRegex,
               use: getStyleLoaders({
                 importLoaders: 1,
-                sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap,  // CRL
+                sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap, // CRL
                 modules: true,
                 getLocalIdent: getCSSModuleLocalIdent,
               }),
@@ -437,7 +430,7 @@ module.exports = function(webpackEnv) {
               use: getStyleLoaders(
                 {
                   importLoaders: 2,
-                  sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap,  // CRL
+                  sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap, // CRL
                 },
                 'sass-loader'
               ),
@@ -454,7 +447,7 @@ module.exports = function(webpackEnv) {
               use: getStyleLoaders(
                 {
                   importLoaders: 2,
-                  sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap,  // CRL
+                  sourceMap: (isEnvDemo || isEnvProduction) && shouldUseSourceMap, // CRL
                   modules: true,
                   getLocalIdent: getCSSModuleLocalIdent,
                 },
@@ -485,31 +478,32 @@ module.exports = function(webpackEnv) {
     },
     plugins: [
       // Generates an `index.html` file with the <script> injected.
-      isEnvDevelopment && new HtmlWebpackPlugin(  // CRL
-        Object.assign(
-          {},
-          {
-            inject: true,
-            template: paths.appHtml,
-          },
-          isEnvProduction
-            ? {
-                minify: {
-                  removeComments: true,
-                  collapseWhitespace: true,
-                  removeRedundantAttributes: true,
-                  useShortDoctype: true,
-                  removeEmptyAttributes: true,
-                  removeStyleLinkTypeAttributes: true,
-                  keepClosingSlash: true,
-                  minifyJS: true,
-                  minifyCSS: true,
-                  minifyURLs: true,
-                },
-              }
-            : undefined
-        )
-      ),
+      isEnvDevelopment &&
+        new HtmlWebpackPlugin( // CRL
+          Object.assign(
+            {},
+            {
+              inject: true,
+              template: paths.appHtml,
+            },
+            isEnvProduction
+              ? {
+                  minify: {
+                    removeComments: true,
+                    collapseWhitespace: true,
+                    removeRedundantAttributes: true,
+                    useShortDoctype: true,
+                    removeEmptyAttributes: true,
+                    removeStyleLinkTypeAttributes: true,
+                    keepClosingSlash: true,
+                    minifyJS: true,
+                    minifyCSS: true,
+                    minifyURLs: true,
+                  },
+                }
+              : undefined
+          )
+        ),
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
       // CRL: Disable InlineChunkHtmlPlugin completely
@@ -542,8 +536,7 @@ module.exports = function(webpackEnv) {
       // to restart the development server for Webpack to discover it. This plugin
       // makes the discovery automatic so you don't have to restart.
       // See https://github.com/facebook/create-react-app/issues/186
-      isEnvDevelopment &&
-        new WatchMissingNodeModulesPlugin(paths.appNodeModules),
+      isEnvDevelopment && new WatchMissingNodeModulesPlugin(paths.appNodeModules),
       (isEnvDemo || isEnvProduction) && // CRL
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output
@@ -554,20 +547,22 @@ module.exports = function(webpackEnv) {
       // Generate a manifest file which contains a mapping of all asset filenames
       // to their corresponding output file so that tools can pick it up without
       // having to parse `index.html`.
-      isEnvDevelopment && new ManifestPlugin({  // CRL
-        fileName: 'asset-manifest.json',
-        publicPath: publicPath,
-        generate: (seed, files) => {
-          const manifestFiles = files.reduce(function(manifest, file) {
-            manifest[file.name] = file.path;
-            return manifest;
-          }, seed);
+      isEnvDevelopment &&
+        new ManifestPlugin({
+          // CRL
+          fileName: 'asset-manifest.json',
+          publicPath: publicPath,
+          generate: (seed, files) => {
+            const manifestFiles = files.reduce(function(manifest, file) {
+              manifest[file.name] = file.path;
+              return manifest;
+            }, seed);
 
-          return {
-            files: manifestFiles,
-          };
-        },
-      }),
+            return {
+              files: manifestFiles,
+            };
+          },
+        }),
       // Moment.js is an extremely popular library that bundles large locale files
       // by default due to how Webpack interprets its code. This is a practical
       // solution that requires the user to opt into importing specific locales.
@@ -611,17 +606,18 @@ module.exports = function(webpackEnv) {
           watch: paths.appSrc,
           silent: true,
           // The formatter is invoked directly in WebpackDevServerUtils during development
-          formatter: (isEnvDemo || isEnvProduction) ? typescriptFormatter : undefined,  // CRL
+          formatter: isEnvDemo || isEnvProduction ? typescriptFormatter : undefined, // CRL
         }),
     ].filter(Boolean),
     // CRL: add externals block since it's a library
     //  no need to ship React since it's shipped with the main app
-    externals: (isEnvDemo || isEnvProduction)
-      ? {
-        react: 'react',
-        'react-dom': 'react-dom',
-      }
-      : {},
+    externals:
+      isEnvDemo || isEnvProduction
+        ? {
+            react: 'react',
+            'react-dom': 'react-dom',
+          }
+        : {},
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
     node: {
