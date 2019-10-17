@@ -33,12 +33,6 @@ const useGoogleMapsActions = () => {
     (directionsResult, mapInstance, directionsRendererOptions = {}) => {
       checkForGoogleMaps();
 
-      if (!directionsResult instanceof window.google.maps.DirectionsResult) {
-        throw new Error(
-          'Param directionsResult is not an instance of google.maps.DirectionsResult.'
-        );
-      }
-
       if (!mapInstance) {
         throw new Error('A map instance must be provided');
       }
