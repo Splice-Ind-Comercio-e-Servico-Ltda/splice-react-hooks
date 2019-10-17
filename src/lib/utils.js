@@ -1,5 +1,5 @@
 export const checkForGoogleMaps = () => {
-  if (!window.google) {
+  if (!(window && window.google)) {
     throw new Error('This method uses Google maps API and it is not loaded.');
   }
 };
